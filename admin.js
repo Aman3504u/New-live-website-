@@ -69,6 +69,10 @@ logoutBtn.addEventListener('click', async () => {
   await supabase.auth.signOut();
 });
 
+// supabase-js v2 fires an INITIAL_SESSION event on subscription, so this
+// one listener handles both the first page load (stored session or not)
+// and later sign-in/sign-out transitions — no separate getSession() call
+// needed, which would otherwise trigger a duplicate loadRows() on reload.
 supabase.auth.onAuthStateChange((_event, session) => {
   if (session?.user) {
     showLoggedIn(session.user);
@@ -77,17 +81,6 @@ supabase.auth.onAuthStateChange((_event, session) => {
     showLoggedOut();
   }
 });
-
-// Initial session check (e.g. page reload with stored token).
-(async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user) {
-    showLoggedIn(session.user);
-    loadRows();
-  } else {
-    showLoggedOut();
-  }
-})();
 
 // ---- Data load ---------------------------------------------------------
 async function loadRows() {
