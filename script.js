@@ -1,7 +1,7 @@
 const form = document.getElementById('resultForm');
 
 form.addEventListener('submit', function (e) {
-  e.preventDefault();
+  e.preventDefault(); // stops page reload
 
   const roll   = document.getElementById('roll').value.trim();
   const school = document.getElementById('school').value.trim();
@@ -12,5 +12,6 @@ form.addEventListener('submit', function (e) {
     return;
   }
 
-  document.getElementById('result').innerText = "Form submitted successfully!";
+  // temporary test
+  alert("Form is working 🚀");
 });
