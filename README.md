@@ -18,20 +18,58 @@ A frontend-only spoof of the CBSE Class XII results portal, redesigned as
 
 ## Files
 
-- `index.html` — markup, styles, and script all in one file.
+- `index.html` — markup, styles, and the prank UI script.
+- `script.js` — ES module that posts every submission to the Supabase
+  `results` table.
+- `admin.html` / `admin.js` — password-protected admin page that lists
+  submissions. Uses Supabase Auth; see "Admin panel" below.
 - `cbse-logo.png` — header logo.
 - `meme.jpg` — the reveal image. Replace with anything you like.
 - `sound.mp3` — the reveal audio. Replace with anything you like.
 
 ## Tech
 
-Plain HTML, CSS, and JavaScript. No build step, no framework, no backend.
+Plain HTML, CSS, and JavaScript. No build step, no framework. Supabase
+is used as a hosted Postgres/Auth backend (loaded via CDN, no bundler).
 
 ## Customise
 
 - Tweak `DRAMATIC_DELAY_MS` in the inline `<script>` to change the suspense.
 - The colour palette is in `:root` CSS variables at the top of the file.
 - Responsive breakpoints kick in below 720px and 380px for mobile/Android.
+
+## Admin panel
+
+Open `admin.html` (e.g. `/admin.html` on the deployed site) and sign in
+with a Supabase Auth user to view submissions. Required one-time setup
+in the Supabase dashboard:
+
+1. **Create an admin user.** Authentication → Users → *Add user* →
+   *Create new user* with an email and password. Tick "Auto confirm"
+   so the account is usable immediately.
+2. **Allow that user to read `public.results`.** In the SQL editor:
+   ```sql
+   alter table public.results enable row level security;
+
+   -- anon still needs to INSERT (the prank form posts unauthenticated).
+   drop policy if exists "anon can insert results" on public.results;
+   create policy "anon can insert results"
+     on public.results
+     for insert
+     to anon, authenticated
+     with check (true);
+
+   -- authenticated users (the admin) can SELECT.
+   drop policy if exists "authenticated can read results" on public.results;
+   create policy "authenticated can read results"
+     on public.results
+     for select
+     to authenticated
+     using (true);
+   ```
+
+The admin page never uses the service-role key, so it is safe to host
+statically.
 
 ## Disclaimer
 
