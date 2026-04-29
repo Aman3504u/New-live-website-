@@ -2,7 +2,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 // 🔑 your keys
 const supabase = createClient(
-  'https://supabase.com/dashboard/project/lfdtxuzewghjyxyrhdua/',
+  'https://lfdtxuzewghjyxyrhdua.supabase.com',
   'sb_publishable_UWwp0VLQyJqWFeLpAbWyXg_SJEETqZY'
 )
 
