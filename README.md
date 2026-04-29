@@ -38,6 +38,24 @@ is used as a hosted Postgres/Auth backend (loaded via CDN, no bundler).
 - The colour palette is in `:root` CSS variables at the top of the file.
 - Responsive breakpoints kick in below 720px and 380px for mobile/Android.
 
+## Supabase schema
+
+The `public.results` table needs the following columns (plus the
+default `id` / `created_at` that Supabase auto-adds):
+
+| column   | type   | notes                                  |
+| -------- | ------ | -------------------------------------- |
+| `roll`   | `text` | Roll number from the form.             |
+| `school` | `text` | School number from the form.           |
+| `admit`  | `text` | Admit-card ID from the form.           |
+| `dob`    | `date` | Date of birth (HTML `<input type=date>`). |
+
+To add `dob` to an existing table, run this once in the SQL editor:
+
+```sql
+alter table public.results add column if not exists dob date;
+```
+
 ## Admin panel
 
 Open `admin.html` (e.g. `/admin.html` on the deployed site) and sign in

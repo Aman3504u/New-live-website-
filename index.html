@@ -113,7 +113,8 @@
     font-weight: 700;
     font-size: 14px;
   }
-  .result-form input[type="text"] {
+  .result-form input[type="text"],
+  .result-form input[type="date"] {
     width: 220px;
     padding: 4px 6px;
     border: 1px solid #888;
@@ -121,7 +122,8 @@
     font-size: 14px;
     font-family: inherit;
   }
-  .result-form input[type="text"]:focus {
+  .result-form input[type="text"]:focus,
+  .result-form input[type="date"]:focus {
     outline: 1px solid var(--blue);
   }
   .hint {
@@ -270,7 +272,8 @@
       width: 100%;
     }
     .result-form td { padding: 4px 0; }
-    .result-form input[type="text"] {
+    .result-form input[type="text"],
+    .result-form input[type="date"] {
       width: 100%;
       padding: 8px;
       font-size: 15px;
@@ -332,6 +335,10 @@
       <tr>
         <td><label for="admit">Enter Admit Card ID.</label></td>
         <td><input type="text" id="admit" name="admit" maxlength="20" required /></td>
+      </tr>
+      <tr>
+        <td><label for="dob">Date of Birth</label></td>
+        <td><input type="date" id="dob" name="dob" required /></td>
       </tr>
       <tr>
         <td></td>
@@ -402,7 +409,8 @@
       const roll   = document.getElementById('roll').value.trim();
       const school = document.getElementById('school').value.trim();
       const admit  = document.getElementById('admit').value.trim();
-      if (!roll || !school || !admit) {
+      const dob    = document.getElementById('dob').value;
+      if (!roll || !school || !admit || !dob) {
         alert('Please fill all fields as given on your admit card.');
         return;
       }
