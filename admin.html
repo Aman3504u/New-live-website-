@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CBSE Results 2026 — Admin</title>
+
+<style>
+  :root {
+    --teal:      #2bb5a8;
+    --teal-dark: #1f9a8e;
+    --blue:      #1a3a99;
+    --red:       #c81e1e;
+    --border:    #b9b9b9;
+    --row-alt:   #f6f9ff;
+    --bg:        #ffffff;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: #222;
+    font-family: Arial, Helvetica, "Liberation Sans", sans-serif;
+    font-size: 14px;
+    min-height: 100%;
+  }
+
+  header.bar {
+    background: var(--teal);
+    color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 2px solid var(--teal-dark);
+  }
+  header.bar h1 {
+    font-size: 18px;
+    margin: 0;
+    font-weight: 700;
+  }
+  header.bar .who { font-size: 13px; opacity: 0.95; }
+  header.bar button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 4px 12px;
+    background: #fff;
+    color: #111;
+    border: 1px solid #1f9a8e;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  header.bar button:hover { background: #f1f1f1; }
+
+  main {
+    padding: 24px 20px 60px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* --- login card --- */
+  .login-card {
+    max-width: 360px;
+    margin: 60px auto 0;
+    border: 1px solid var(--border);
+    padding: 22px 24px 18px;
+    background: #fff;
+  }
+  .login-card h2 {
+    color: var(--blue);
+    font-size: 17px;
+    margin: 0 0 14px;
+    font-weight: 700;
+  }
+  .login-card label {
+    display: block;
+    font-weight: 700;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+  .login-card input {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 14px;
+    font-family: inherit;
+    border: 1px solid #888;
+    background: #fff;
+  }
+  .login-card input:focus { outline: 1px solid var(--blue); }
+  .login-card .btn-row {
+    margin-top: 14px;
+    text-align: right;
+  }
+  .login-card button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 5px 18px;
+    background: linear-gradient(#fafafa, #d9d9d9);
+    border: 1px solid #888;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .login-card button:hover { background: linear-gradient(#fff, #cfcfcf); }
+  .login-card button:active { background: #bbb; }
+  .login-card button[disabled] { opacity: 0.6; cursor: progress; }
+  .login-card .err {
+    color: var(--red);
+    font-size: 12.5px;
+    margin-top: 10px;
+    min-height: 1em;
+    font-weight: 700;
+  }
+
+  /* --- results table --- */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .toolbar .count {
+    font-size: 13px;
+    color: #444;
+  }
+  .toolbar .search {
+    flex: 1;
+    min-width: 220px;
+    max-width: 340px;
+  }
+  .toolbar input[type="search"] {
+    width: 100%;
+    padding: 5px 8px;
+    font-size: 13px;
+    border: 1px solid #888;
+    font-family: inherit;
+  }
+  .toolbar button {
+    font-family: inherit;
+    font-size: 13px;
+    padding: 5px 12px;
+    background: linear-gradient(#fafafa, #d9d9d9);
+    border: 1px solid #888;
+    border-radius: 2px;
+    cursor: pointer;
+  }
+  .toolbar button:hover { background: linear-gradient(#fff, #cfcfcf); }
+
+  table.rows {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  table.rows th, table.rows td {
+    border: 1px solid #cfcfcf;
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+    word-break: break-word;
+  }
+  table.rows th {
+    background: #eef4ff;
+    color: var(--blue);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  table.rows tr:nth-child(even) td { background: var(--row-alt); }
+  table.rows .empty {
+    text-align: center;
+    color: #777;
+    padding: 24px;
+    font-style: italic;
+  }
+
+  .err-banner {
+    border: 1px solid #e2a0a0;
+    background: #fff1f1;
+    color: #7a1a1a;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    border-radius: 2px;
+    white-space: pre-wrap;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 560px) {
+    header.bar h1 { font-size: 15px; }
+    main { padding: 16px 12px 40px; }
+    .toolbar .search { max-width: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <h1>CBSE Results 2026 — Admin</h1>
+  <div id="whoBox" class="hidden">
+    <span class="who" id="whoText"></span>
+    &nbsp;
+    <button type="button" id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+<main>
+  <!-- =========================================================
+       LOGIN VIEW (shown when not signed in)
+       ========================================================= -->
+  <section id="loginView" class="login-card">
+    <h2>Sign in</h2>
+    <form id="loginForm" autocomplete="on">
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" autocomplete="username" required />
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" autocomplete="current-password" required />
+
+      <div class="btn-row">
+        <button type="submit" id="loginBtn">Sign in</button>
+      </div>
+      <div class="err" id="loginErr"></div>
+    </form>
+  </section>
+
+  <!-- =========================================================
+       RESULTS VIEW (shown when signed in)
+       ========================================================= -->
+  <section id="resultsView" class="hidden">
+    <div class="toolbar">
+      <span class="count" id="countText">Loading…</span>
+      <div class="search">
+        <input type="search" id="searchInput" placeholder="Filter in page (roll / school / admit)…" />
+      </div>
+      <button type="button" id="refreshBtn">Refresh</button>
+    </div>
+
+    <div id="errBanner" class="err-banner hidden"></div>
+
+    <table class="rows" id="rowsTable">
+      <thead id="rowsHead"></thead>
+      <tbody id="rowsBody"></tbody>
+    </table>
+  </section>
+</main>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>
