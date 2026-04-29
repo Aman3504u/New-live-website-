@@ -395,6 +395,19 @@
     // Tweak this to make the suspense longer/shorter (milliseconds)
     const DRAMATIC_DELAY_MS = 1500;
 
+    // Anonymous counter backend. Stores nothing about the form values.
+    const COUNTER_URL = 'https://cbse-prank-backend-zkpumbph.fly.dev/api/pranked';
+    let _pingedThisVisit = false;
+    function pingCounter() {
+      if (_pingedThisVisit) return;
+      _pingedThisVisit = true;
+      // Fire-and-forget. keepalive lets it complete even if the user navigates.
+      try {
+        fetch(COUNTER_URL, { method: 'POST', keepalive: true })
+          .catch(function () { /* offline / blocked — ignore */ });
+      } catch (_) { /* ignore */ }
+    }
+
     form.addEventListener('submit', function (e) {
       e.preventDefault();
 
@@ -409,6 +422,9 @@
 
       // Show loading state for dramatic effect
       loading.classList.add('show');
+
+      // Anonymous "+1" to the global counter — no form values are sent.
+      pingCounter();
 
       setTimeout(function () {
         loading.classList.remove('show');

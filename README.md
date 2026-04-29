@@ -25,7 +25,9 @@ A frontend-only spoof of the CBSE Class XII results portal, redesigned as
 
 ## Tech
 
-Plain HTML, CSS, and JavaScript. No build step, no framework, no backend.
+Plain HTML, CSS, and JavaScript for the page. An optional tiny FastAPI
+service in [`backend/`](./backend) keeps an **anonymous** prank counter —
+it stores a single integer and a timestamp, never the form values.
 
 ## Customise
 
