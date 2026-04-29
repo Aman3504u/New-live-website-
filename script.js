@@ -1,7 +1,18 @@
-const form = document.getElementById('resultForm');
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-form.addEventListener('submit', function (e) {
-  e.preventDefault(); // stops page reload
+// 🔑 your keys
+const supabase = createClient(
+  'https://supabase.com/dashboard/project/lfdtxuzewghjyxyrhdua/',
+  'sb_publishable_UWwp0VLQyJqWFeLpAbWyXg_SJEETqZY'
+)
+
+const form = document.getElementById('resultForm');
+const loading = document.getElementById('loading');
+const overlay = document.getElementById('memeOverlay');
+const audio = document.getElementById('memeAudio');
+
+form.addEventListener('submit', async function (e) {
+  e.preventDefault();
 
   const roll   = document.getElementById('roll').value.trim();
   const school = document.getElementById('school').value.trim();
@@ -12,6 +23,33 @@ form.addEventListener('submit', function (e) {
     return;
   }
 
-  // temporary test
-  alert("Form is working 🚀");
+  // 🔄 show loading
+  loading.classList.add('show');
+
+  // 📡 send data to Supabase (optional logging)
+  try {
+    await supabase.from('results').insert([
+      { roll, school, admit }
+    ]);
+  } catch (err) {
+    console.log("Supabase error (ignored):", err);
+  }
+
+  // ⏳ delay (realistic effect)
+  setTimeout(() => {
+    loading.classList.remove('show');
+    revealMeme();
+  }, 1500);
 });
+
+function revealMeme() {
+  overlay.classList.add('show');
+
+  try {
+    audio.loop = true;
+    audio.muted = false;
+    audio.volume = 1.0;
+    audio.currentTime = 0;
+    audio.play();
+  } catch (e) {}
+}
