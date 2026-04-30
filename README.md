@@ -23,7 +23,10 @@ network drops.
 
 Plain HTML, CSS, and JavaScript. No build step, no framework.
 Supabase is used as a hosted Postgres/Auth backend (loaded via CDN,
-no bundler).
+no bundler). A legacy optional FastAPI service in
+[`backend/`](./backend) keeps an **anonymous** counter (single integer
++ timestamp, never the form values) — left over from the CBSE prank
+page; not currently wired into the Peace Ghost landing.
 
 ## Supabase schema
 
