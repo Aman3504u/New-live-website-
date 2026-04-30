@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>CBSE Results 2026 — Admin</title>
+<title>Admin — CBSE Results &amp; Peace Ghost Feedbacks</title>
 
 <style>
   :root {
@@ -200,7 +200,7 @@
 <body>
 
 <header class="bar">
-  <h1>CBSE Results 2026 — Admin</h1>
+  <h1>Admin Panel</h1>
   <div id="whoBox" class="hidden">
     <span class="who" id="whoText"></span>
     &nbsp;
@@ -233,9 +233,14 @@
        ========================================================= -->
   <section id="resultsView" class="hidden">
     <div class="toolbar">
+      <label for="tableSelect" style="font-weight:700;color:var(--blue);">Table:</label>
+      <select id="tableSelect" style="font-family:inherit;font-size:13px;padding:5px 8px;border:1px solid #888;background:#fff;">
+        <option value="results">CBSE results</option>
+        <option value="feedbacks">Peace Ghost feedbacks</option>
+      </select>
       <span class="count" id="countText">Loading…</span>
       <div class="search">
-        <input type="search" id="searchInput" placeholder="Filter in page (roll / school / admit / dob)…" />
+        <input type="search" id="searchInput" placeholder="Filter in page…" />
       </div>
       <button type="button" id="refreshBtn">Refresh</button>
     </div>
