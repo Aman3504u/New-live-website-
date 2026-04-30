@@ -23,6 +23,9 @@ A frontend-only spoof of the CBSE Class XII results portal, redesigned as
   `results` table.
 - `admin.html` / `admin.js` — password-protected admin page that lists
   submissions. Uses Supabase Auth; see "Admin panel" below.
+- `peaceghost.html` — standalone dark/horror landing page with a
+  feedback form that writes to the Supabase `feedbacks` table and
+  also keeps a backup copy in `localStorage`.
 - `cbse-logo.png` — header logo.
 - `meme.jpg` — the reveal image. Replace with anything you like.
 - `sound.mp3` — the reveal audio. Replace with anything you like.
@@ -40,6 +43,53 @@ it — it stores a single integer and a timestamp, never the form values.
 - Tweak `DRAMATIC_DELAY_MS` in the inline `<script>` to change the suspense.
 - The colour palette is in `:root` CSS variables at the top of the file.
 - Responsive breakpoints kick in below 720px and 380px for mobile/Android.
+
+## Supabase schema
+
+The `public.results` table needs the following columns (plus the
+default `id` / `created_at` that Supabase auto-adds):
+
+| column   | type   | notes                                  |
+| -------- | ------ | -------------------------------------- |
+| `roll`   | `text` | Roll number from the form.             |
+| `school` | `text` | School number from the form.           |
+| `admit`  | `text` | Admit-card ID from the form.           |
+| `dob`    | `date` | Date of birth (HTML `<input type=date>`). |
+
+To add `dob` to an existing table, run this once in the SQL editor:
+
+```sql
+alter table public.results add column if not exists dob date;
+```
+
+### `feedbacks` table (used by `peaceghost.html`)
+
+Run once in the SQL editor:
+
+```sql
+create table if not exists public.feedbacks (
+  id          bigint generated always as identity primary key,
+  created_at  timestamptz not null default now(),
+  name        text        not null,
+  feedback    text        not null
+);
+
+alter table public.feedbacks enable row level security;
+
+drop policy if exists "anon can insert feedbacks" on public.feedbacks;
+create policy "anon can insert feedbacks"
+  on public.feedbacks
+  for insert
+  to anon, authenticated
+  with check (true);
+
+drop policy if exists "authenticated can read feedbacks" on public.feedbacks;
+create policy "authenticated can read feedbacks"
+  on public.feedbacks
+  for select
+  to authenticated
+  using (true);
+```
 
 ## Admin panel
 

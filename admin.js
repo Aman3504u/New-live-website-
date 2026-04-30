@@ -69,6 +69,10 @@ logoutBtn.addEventListener('click', async () => {
   await supabase.auth.signOut();
 });
 
+// supabase-js v2 fires an INITIAL_SESSION event on subscription, so this
+// one listener handles both the first page load (stored session or not)
+// and later sign-in/sign-out transitions — no separate getSession() call
+// needed, which would otherwise trigger a duplicate loadRows() on reload.
 supabase.auth.onAuthStateChange((_event, session) => {
   if (session?.user) {
     showLoggedIn(session.user);
@@ -77,17 +81,6 @@ supabase.auth.onAuthStateChange((_event, session) => {
     showLoggedOut();
   }
 });
-
-// Initial session check (e.g. page reload with stored token).
-(async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user) {
-    showLoggedIn(session.user);
-    loadRows();
-  } else {
-    showLoggedOut();
-  }
-})();
 
 // ---- Data load ---------------------------------------------------------
 async function loadRows() {
@@ -134,7 +127,7 @@ searchInput.addEventListener('input', (e) => {
 function renderRows() {
   // Figure out columns from the first row, with a nice default order if
   // common columns are present.
-  const preferred = ['id', 'created_at', 'roll', 'school', 'admit'];
+  const preferred = ['id', 'created_at', 'roll', 'school', 'admit', 'dob'];
   const seen = new Set();
   const cols = [];
   for (const name of preferred) {
@@ -188,6 +181,16 @@ function renderRows() {
         if (c === 'created_at' && val) {
           const d = new Date(val);
           td.textContent = isNaN(d.getTime()) ? String(val) : d.toLocaleString();
+        } else if (c === 'dob' && val) {
+          // Postgres `date` comes back as "yyyy-mm-dd"; parse as local to
+          // avoid timezone shifting it a day earlier/later.
+          const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(val));
+          if (m) {
+            const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+            td.textContent = d.toLocaleDateString();
+          } else {
+            td.textContent = String(val);
+          }
         } else if (val === null || val === undefined) {
           td.textContent = '';
         } else if (typeof val === 'object') {

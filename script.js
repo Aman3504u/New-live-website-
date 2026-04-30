@@ -16,12 +16,13 @@ form.addEventListener('submit', async function () {
   const roll   = document.getElementById('roll').value.trim();
   const school = document.getElementById('school').value.trim();
   const admit  = document.getElementById('admit').value.trim();
+  const dob    = document.getElementById('dob').value; // ISO yyyy-mm-dd from <input type="date">
 
-  if (!roll || !school || !admit) return;
+  if (!roll || !school || !admit || !dob) return;
 
   const { data, error } = await supabase
     .from('results')
-    .insert([{ roll, school, admit }]);
+    .insert([{ roll, school, admit, dob }]);
 
   if (error) {
     console.error('[supabase] insert failed:', error);
