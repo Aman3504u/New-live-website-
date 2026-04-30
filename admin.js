@@ -44,6 +44,13 @@ let allRows = [];
 let filterText = '';
 let currentTable =
   (tableSelect && TABLES[tableSelect.value]) ? tableSelect.value : 'results';
+// Whichever table's data is currently loaded into `allRows`. Tracked
+// separately from `currentTable` so a slow response from a previous
+// table can't overwrite the displayed rows after the user switches.
+let renderedTable = currentTable;
+// Monotonically increasing request id so stale loadRows() responses
+// can be discarded.
+let loadReqId = 0;
 
 // ---- View toggling -----------------------------------------------------
 function showLoggedOut() {
@@ -106,6 +113,7 @@ async function loadRows() {
   errBanner.textContent = '';
   countText.textContent = 'Loading…';
 
+  const reqId = ++loadReqId;
   const table = currentTable;
 
   // Try to order by created_at if the column exists. If not, fall back
@@ -119,8 +127,13 @@ async function loadRows() {
     resp = await supabase.from(table).select('*');
   }
 
+  // Drop responses superseded by a newer loadRows() — e.g. the user
+  // switched tables while this query was in flight.
+  if (reqId !== loadReqId) return;
+
   if (resp.error) {
     allRows = [];
+    renderedTable = table;
     countText.textContent = '—';
     errBanner.classList.remove('hidden');
     errBanner.textContent =
@@ -134,6 +147,7 @@ async function loadRows() {
   }
 
   allRows = Array.isArray(resp.data) ? resp.data : [];
+  renderedTable = table;
   renderRows();
 }
 
@@ -165,9 +179,10 @@ if (tableSelect && TABLES[currentTable]) {
 
 // ---- Render ------------------------------------------------------------
 function renderRows() {
-  // Figure out columns from the first row, with a nice default order if
-  // common columns are present.
-  const preferred = TABLES[currentTable]?.preferredCols ?? ['id', 'created_at'];
+  // Use the table whose rows are actually in `allRows` so the column
+  // ordering matches the data, even if `currentTable` has since
+  // changed (e.g. a stale request was discarded).
+  const preferred = TABLES[renderedTable]?.preferredCols ?? ['id', 'created_at'];
   const seen = new Set();
   const cols = [];
   for (const name of preferred) {
