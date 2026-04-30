@@ -18,14 +18,39 @@ const whoText     = document.getElementById('whoText');
 const logoutBtn   = document.getElementById('logoutBtn');
 const refreshBtn  = document.getElementById('refreshBtn');
 const searchInput = document.getElementById('searchInput');
+const tableSelect = document.getElementById('tableSelect');
 const countText   = document.getElementById('countText');
 const errBanner   = document.getElementById('errBanner');
 const rowsHead    = document.getElementById('rowsHead');
 const rowsBody    = document.getElementById('rowsBody');
 
+// ---- Table config ------------------------------------------------------
+// Each entry describes one Supabase table the admin can browse.
+const TABLES = {
+  results: {
+    label:           'CBSE results',
+    preferredCols:   ['id', 'created_at', 'roll', 'school', 'admit', 'dob'],
+    searchHint:      'Filter in page (roll / school / admit / dob)…',
+  },
+  feedbacks: {
+    label:           'Peace Ghost feedbacks',
+    preferredCols:   ['id', 'created_at', 'name', 'feedback'],
+    searchHint:      'Filter in page (name / feedback)…',
+  },
+};
+
 // ---- State -------------------------------------------------------------
 let allRows = [];
 let filterText = '';
+let currentTable =
+  (tableSelect && TABLES[tableSelect.value]) ? tableSelect.value : 'results';
+// Whichever table's data is currently loaded into `allRows`. Tracked
+// separately from `currentTable` so a slow response from a previous
+// table can't overwrite the displayed rows after the user switches.
+let renderedTable = currentTable;
+// Monotonically increasing request id so stale loadRows() responses
+// can be discarded.
+let loadReqId = 0;
 
 // ---- View toggling -----------------------------------------------------
 function showLoggedOut() {
@@ -88,31 +113,41 @@ async function loadRows() {
   errBanner.textContent = '';
   countText.textContent = 'Loading…';
 
+  const reqId = ++loadReqId;
+  const table = currentTable;
+
   // Try to order by created_at if the column exists. If not, fall back
   // to an unordered select.
   let resp = await supabase
-    .from('results')
+    .from(table)
     .select('*')
     .order('created_at', { ascending: false });
 
   if (resp.error && /created_at/i.test(resp.error.message || '')) {
-    resp = await supabase.from('results').select('*');
+    resp = await supabase.from(table).select('*');
   }
+
+  // Drop responses superseded by a newer loadRows() — e.g. the user
+  // switched tables while this query was in flight.
+  if (reqId !== loadReqId) return;
 
   if (resp.error) {
     allRows = [];
+    renderedTable = table;
     countText.textContent = '—';
     errBanner.classList.remove('hidden');
     errBanner.textContent =
-      `Failed to load rows: ${resp.error.message}\n\n` +
-      `If this says "permission denied" or similar, add a SELECT policy ` +
-      `for the "authenticated" role on public.results in the Supabase ` +
-      `dashboard. See the admin panel PR description for the exact SQL.`;
+      `Failed to load rows from "${table}": ${resp.error.message}\n\n` +
+      `If this says "permission denied", add a SELECT policy for the ` +
+      `"authenticated" role on public.${table} in the Supabase dashboard. ` +
+      `If it says the table doesn't exist, run the table-creation SQL ` +
+      `from the README.`;
     renderRows();
     return;
   }
 
   allRows = Array.isArray(resp.data) ? resp.data : [];
+  renderedTable = table;
   renderRows();
 }
 
@@ -123,11 +158,31 @@ searchInput.addEventListener('input', (e) => {
   renderRows();
 });
 
+if (tableSelect) {
+  tableSelect.addEventListener('change', (e) => {
+    const next = e.target.value;
+    if (!TABLES[next]) return;
+    currentTable = next;
+    searchInput.placeholder = TABLES[next].searchHint;
+    // Reset filter text so a roll-number filter doesn't carry over to
+    // a feedbacks search and confuse the user.
+    filterText = '';
+    searchInput.value = '';
+    loadRows();
+  });
+}
+
+// Initialise the search hint to whatever table is selected on load.
+if (tableSelect && TABLES[currentTable]) {
+  searchInput.placeholder = TABLES[currentTable].searchHint;
+}
+
 // ---- Render ------------------------------------------------------------
 function renderRows() {
-  // Figure out columns from the first row, with a nice default order if
-  // common columns are present.
-  const preferred = ['id', 'created_at', 'roll', 'school', 'admit', 'dob'];
+  // Use the table whose rows are actually in `allRows` so the column
+  // ordering matches the data, even if `currentTable` has since
+  // changed (e.g. a stale request was discarded).
+  const preferred = TABLES[renderedTable]?.preferredCols ?? ['id', 'created_at'];
   const seen = new Set();
   const cols = [];
   for (const name of preferred) {
